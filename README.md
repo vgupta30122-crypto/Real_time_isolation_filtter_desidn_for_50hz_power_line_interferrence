@@ -1,5 +1,5 @@
 ## Introduction
-
+my name is vishal gupta 
 
 <b>Discipline | <b>Fill your discipline name here
 :--|:--|
@@ -12,9 +12,9 @@ Fill a brief description of this experiment here
 
 <b>Name of Developer | <b> Fill the name of experiment owner here 
 :--|:--|
-<b> Institute | <b>  
-<b> Email id|     <b>  
-<b> Department |  
+<b> Institute |Rajkiya engginering college banda <b>  
+<b> Email id| vgupta30122@gmail.com  <b>  
+<b> Department | Information Technology <b> 
 
 ### Contributors List
 
