@@ -10,7 +10,7 @@ my name is vishal gupta
 
 Fill a brief description of this experiment here
 
-<b>Name of Developer | <b> Fill the name of experiment owner here 
+<b>Name of Developer |  Er Vishal Gupta <b> Fill the name of experiment owner here 
 :--|:--|
 <b> Institute |Rajkiya engginering college banda <b>  
 <b> Email id| vgupta30122@gmail.com  <b>  
