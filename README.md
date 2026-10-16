@@ -11,11 +11,11 @@ The aim of this experiment is to design and implement a real-time digital filter
 
 <b>Name of Developer |  Er Vishal Gupta <b> Fill the name of experiment owner here 
 :--|:--|
-<b> Institute Nmae  | Rajkiya Engginering College Banda <b>  
+<b> Institute Name | Rajkiya Engginering College Banda <b>  
 <b> Email id |vgupta30122@gmail.com  <b>  
 <b> Branch|Information Technology <b> 
 
 ### Contributors List
 
-SrNo | 1 |Name - Vishal Gupta|  Faculty or Student -  Student| Department- Information Technology Institute |  Rajkiya Engginering College Banda| Email id   vgupta30122@gmail.com 
+SrNo | 1 |Name | Vishal Gupta|  Faculty or Student   Student| Department|Information Technology Institute |  Rajkiya Engginering College, Banda| Email id |  vgupta30122@gmail.com 
 
