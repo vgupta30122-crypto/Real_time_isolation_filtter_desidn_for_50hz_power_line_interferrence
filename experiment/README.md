@@ -1,11 +1,71 @@
 # Steps to Create an Experiment
-Welcome to the experiment development process for developers involved in the Virtual Labs project. This guide will help you create an experiment designed to explain the lab topic. 
+
+### Step 1: Generate the Input Signal
+Create or select an input signal containing the useful signal components.
+
+### Step 2: Add 50 Hz Interference
+Introduce 50 Hz power-line noise into the input signal to simulate real-world interference.
+
+### Step 3: Design the Notch Filter
+Design a digital notch filter with a center frequency of 50 Hz to attenuate the unwanted noise.
+
+### Step 4: Apply the Filter
+Pass the noisy input signal through the designed notch filter.
+
+### Step 5: Analyze the Output Signal
+Observe the filtered output and compare it with the noisy input signal using waveform plots.
+
+### Step 6: Evaluate Filter Performance
+Analyze the reduction in 50 Hz interference and check whether the useful signal components are preserved.
+
+### Step 7: Document the Results
+Record the simulation parameters, input and output waveforms, filter response, and final observations.
+
+### Step 8: Conclusion
+Summarize how effectively the notch filter reduces 50 Hz power-line interference in the simulated signal. 
 
 ## Verify and Understand the Experiment Repositories
-Begin by thoroughly reviewing and understanding the structure and purpose of the experiment repositories. For more details visit [here](https://vlead.vlabs.ac.in/development/#development-process)
+
+Begin by reviewing the structure, objectives, and implementation of the experiment repository to understand how the simulation is organized and how the experiment works.
+
+### Steps to Follow
+
+1. **Review the Repository Structure:** Explore the available source code, simulation files, documentation, and supporting resources.
+
+2. **Understand the Experiment Objective:** Identify the purpose of removing 50 Hz power-line interference using a digital notch filter.
+
+3. **Analyze the Implementation:** Understand how the input signal is generated, how interference is introduced, and how the notch filter processes the noisy signal.
+
+4. **Review the Simulation Results:** Examine the input and output waveforms and the filter response to evaluate the attenuation of 50 Hz interference.
+
+5. **Verify the Experiment:** Run the simulation using the provided instructions, if available, and check whether the results match the expected filter behavior.
+
+6. **Follow Virtual Labs Development Guidelines:** Refer to the official development documentation to understand the recommended process for developing and organizing virtual experiments.
+
+**Reference:** [Virtual Labs – Development Process](https://vlead.vlabs.ac.in/development/#development-process)
 
 ## Repository Creation
-The VLEAD team will create a GitHub repository for each experiment. The write access to these repositories is a must to be able to create, edit or modify the experiment. You can refer to this [example repository](https://github.com/virtual-labs-cms/exp-template) to get familiar with the structure and format.
+## Repository Creation
+
+Create a GitHub repository to organize, manage, and document the experiment **Real-Time Isolation Filter Design for 50 Hz Power-Line Interference**.
+
+### Steps to Create the Repository
+
+1. **Open GitHub:** Visit [GitHub](https://github.com/) and sign in to your account.
+
+2. **Create a New Repository:** Click the **New Repository** option.
+
+3. **Enter Repository Details:** Set the repository name to `Real_time_isolation_filtter_desidn_for_50hz_power_line_interferrence` and add a brief description of the experiment.
+
+4. **Choose Visibility:** Select Public or Private according to your requirements.
+
+5. **Initialize the Repository:** Add a `README.md` file to describe the experiment, its objectives, methodology, simulation procedure, and expected results.
+
+6. **Upload Project Files:** Upload the simulation code, related files, plots, and supporting documentation.
+
+7. **Commit Changes:** Save the files to the repository and verify that the project structure and README are displayed correctly.
+
+**Repository Link:** [Real-Time Isolation Filter Design for 50 Hz Power-Line Interference](https://github.com/vgupta30122-crypto/Real_time_isolation_filtter_desidn_for_50hz_power_line_interferrence)1W
 
 ## Branch Structure
 Each repository will contain four branches:
@@ -13,7 +73,8 @@ Each repository will contain four branches:
 * **testing** (end-to-end testing)
 * **gh-pages** (for GitHub Pages hosting)
 * **main** (production-ready)
-Developers are required to work exclusively in the dev branch. Once the dev branch has been fully tested, it should be merged into the testing branch. This will automatically deploy the experiment and user interface to GitHub Pages for testing. The link to the deployed page can be found in the 'About' section of the experiment repository.
+Developers are required to work exclusively in the dev branch. Once the dev branch has been fully tested, it should be merged into the testing branch. This will automatically deploy the experiment and user interfac.
++e to GitHub Pages for testing. The link to the deployed page can be found in the 'About' section of the experiment repository.
 
 ## Content for Experiment Development
 The content for each experiment should be organized across the designated pages. Please maintain the existing file names and only populate the current files with the content of your experiment.
