@@ -2,38 +2,38 @@
   "version": 2.0,
   "questions": [
     {
-      "question": "This is a Sample Question 1?",
+      "question": "In a 2nd-order IIR Notch filter designed for 50 Hz cancellation, what is the effect of increasing the Quality Factor (Q)?",
       "answers": {
-        "a": "answer1",
-        "b": "answer2",
-        "c": "answer3",
-        "d": "answer4"
+        "a": "The notch bandwidth becomes narrower, preserving adjacent ECG frequency components",
+        "b": "The notch bandwidth widens, attenuating the entire ECG spectrum",
+        "c": "The sampling rate of the system is halved",
+        "d": "The filter turns into an ideal high-pass differentiator"
       },
       "explanations": {
-        "a": "Explanation 1  <a href='www.google.com'>here</a>",
-        "b": "Explanation 2",
-        "c": "Explanation 2",
-        "d": "Explanation 2"
+        "a": "Because Q = f0 / BW, a higher Q decreases bandwidth BW, producing a sharp notch that eliminates 50 Hz without clipping QRS or P-wave diagnostics.",
+        "b": "Lower Q widens the notch bandwidth, not higher Q.",
+        "c": "Quality factor does not alter the hardware sampling frequency.",
+        "d": "Q-factor adjusts the pole radius in the z-plane, maintaining a bandstop notch characteristic."
       },
       "correctAnswer": "a",
-      "difficulty": "beginner"
+      "difficulty": "intermediate"
     },
     {
-      "question": "This is a Sample Question 2?",
+      "question": "What is the expected Common Mode Rejection Ratio (CMRR) of a modern galvanically isolated biomedical front-end?",
       "answers": {
-        "a": "answer1",
-        "b": "answer2",
-        "c": "answer3",
-        "d": "answer4"
+        "a": "< 20 dB",
+        "b": "40 dB to 60 dB",
+        "c": "> 110 dB to 120 dB",
+        "d": "Exactly 0 dB"
       },
       "explanations": {
-        "a": "Explanation 1  <a href='www.google.com'>here</a>",
-        "b": "Explanation 2",
-        "c": "Explanation 2",
-        "d": "Explanation 2"
+        "a": "A CMRR of < 20 dB would leave severe common mode distortion.",
+        "b": "Non-isolated standard operational amplifiers offer 60-80 dB CMRR.",
+        "c": "With an optical/capacitive galvanic isolation barrier breaking ground loops, CMRR routinely exceeds 110 dB to 120 dB, eliminating mains hum.",
+        "d": "0 dB represents unity gain with zero common mode rejection."
       },
       "correctAnswer": "c",
-      "difficulty": "beginner"
+      "difficulty": "intermediate"
     }
   ]
 }

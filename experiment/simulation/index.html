@@ -1,13 +1,747 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-	<!-- Add CSS at the head of HTML file -->
-    <link rel="stylesheet" href="./css/main.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Real-Time Isolation Filter Design for 50Hz Power Line Interference | 3D VR Lab</title>
+
+  <!-- Google Fonts & FontAwesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&family=Orbitron:wght@600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Simulation CSS -->
+  <link rel="stylesheet" href="./css/main.css">
 </head>
 <body>
-		<!-- Your code goes here-->
 
-	<!-- Add JS at the bottom of HTML file --> 
-        <script src="./js/main.js"></script>
+  <!-- 3D Three.js WebGL / WebXR Viewport Container -->
+  <div id="canvas-container"></div>
+
+  <!-- Top Header Navigation -->
+  <header class="top-header">
+    <div class="brand-section">
+      <div class="lab-icon-pulse">
+        <i class="fa-solid fa-wave-square"></i>
+      </div>
+      <div class="title-wrap">
+        <h1>
+          50Hz Power Line Interference Isolation & Filter
+          <span class="sub-badge">Virtual Lab 3D</span>
+        </h1>
+      </div>
+    </div>
+
+    <div class="header-badges">
+      <div class="status-badge">
+        <span class="dot"></span>
+        <span id="fps-counter">60 FPS</span>
+      </div>
+      <div class="status-badge stream-badge" id="sim-status-badge">
+        <span class="dot green"></span>
+        <span id="sim-state-text">LIVE</span>
+      </div>
+      <div class="status-badge vr-badge" id="vr-status-badge">
+        <span class="dot"></span>
+        <span>WebXR VR Ready</span>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn-header" id="btn-open-instruments" title="Open Expanded 2D Oscilloscope & FFT Analyzer">
+        <i class="fa-solid fa-chart-line"></i> Expanded DSO & FFT
+      </button>
+      <button class="btn-header" id="btn-open-theory" title="View Filter & Isolation Theory">
+        <i class="fa-solid fa-book-open"></i> Theory
+      </button>
+      <button class="btn-header primary" id="btn-open-guide" title="Guided 8-Step Lab Procedure">
+        <i class="fa-solid fa-list-check"></i> Lab Steps (8)
+      </button>
+      <button class="btn-header" id="btn-print-report" title="Generate Print-Friendly Experiment Report">
+        <i class="fa-solid fa-file-pdf"></i> Report
+      </button>
+      <button class="btn-header" id="btn-reset-exp" title="Reset All to Defaults">
+        <i class="fa-solid fa-arrow-rotate-left"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Quick Camera Navigation Bar -->
+  <nav class="camera-nav-bar" id="camera-nav">
+    <button class="cam-btn active" data-cam="overview">
+      <i class="fa-solid fa-eye"></i> Lab View
+    </button>
+    <button class="cam-btn" data-cam="dso">
+      <i class="fa-solid fa-tv"></i> Oscilloscope (DSO)
+    </button>
+    <button class="cam-btn" data-cam="spectrum">
+      <i class="fa-solid fa-chart-column"></i> FFT Spectrum
+    </button>
+    <button class="cam-btn" data-cam="circuit">
+      <i class="fa-solid fa-microchip"></i> Isolation Filter PCB
+    </button>
+    <button class="cam-btn" data-cam="patient">
+      <i class="fa-solid fa-heart-pulse"></i> Patient Leads
+    </button>
+  </nav>
+
+  <!-- Floating Real-Time Performance Analytics HUD (Left Side) -->
+  <aside class="hud-analytics" id="hud-panel">
+    <div class="panel-header">
+      <span class="panel-title">
+        <i class="fa-solid fa-gauge-high"></i> Performance Analytics
+      </span>
+      <span id="sig-type-tag" class="status-tag active">ECG 72 BPM</span>
+    </div>
+
+    <div class="edu-disclaimer-pill">
+      <i class="fa-solid fa-circle-info"></i> Simulated Educational Biomedical Data
+    </div>
+
+    <div class="metric-grid">
+      <div class="metric-card">
+        <div class="metric-label">Input Noise RMS</div>
+        <div class="metric-value" id="metric-noise-rms">848.5 <span class="unit">µV</span></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Output Error RMS</div>
+        <div class="metric-value snr-good" id="metric-error-rms">42.1 <span class="unit">µV</span></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Input SNR</div>
+        <div class="metric-value snr-bad" id="metric-snr-in">-4.2 <span class="unit">dB</span></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Output SNR</div>
+        <div class="metric-value snr-good" id="metric-snr-out">+27.8 <span class="unit">dB</span></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Noise Reduction</div>
+        <div class="metric-value snr-good" id="metric-reduction">95.0 <span class="unit">%</span></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">50Hz Attenuation</div>
+        <div class="metric-value attenuation" id="metric-attenuation">-46.8 <span class="unit">dB</span></div>
+      </div>
+      <div class="metric-card full-width">
+        <div class="metric-label">Galvanic Isolation CMRR</div>
+        <div class="metric-value isolated" id="metric-cmrr">> 120 <span class="unit">dB (IEC 60601-1 Safe)</span></div>
+      </div>
+    </div>
+
+    <div class="live-status-list">
+      <div class="status-row">
+        <span>Optocoupler Isolation</span>
+        <span class="status-tag active" id="badge-iso-status">ACTIVE</span>
+      </div>
+      <div class="status-row">
+        <span>Active Notch Filter</span>
+        <span class="status-tag active" id="badge-filter-status">FILTERING</span>
+      </div>
+      <div class="status-row">
+        <span>Filter Bandwidth (Δf)</span>
+        <span class="status-tag" id="badge-bw-status">3.1 Hz (Q=16)</span>
+      </div>
+    </div>
+
+    <!-- Web Audio 50Hz Hum Immersion -->
+    <div class="audio-hum-box">
+      <button class="btn-audio" id="btn-toggle-audio">
+        <i class="fa-solid fa-volume-high"></i>
+        <span id="audio-btn-text">Listen to 50Hz Hum</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Controls Dock (Right Side) -->
+  <aside class="controls-dock" id="controls-dock">
+    <button class="btn-dock-toggle" id="btn-toggle-dock" title="Toggle Controls Dock">
+      <i class="fa-solid fa-chevron-right" id="dock-toggle-icon"></i>
+    </button>
+
+    <div class="controls-header">
+      <span class="panel-title">
+        <i class="fa-solid fa-sliders"></i> Virtual Workbench Controls
+      </span>
+      <div class="sim-state-btns">
+        <button class="btn-header-small" id="btn-sim-play" title="Start / Resume Simulation">
+          <i class="fa-solid fa-play"></i>
+        </button>
+        <button class="btn-header-small" id="btn-sim-pause" title="Pause Simulation">
+          <i class="fa-solid fa-pause"></i>
+        </button>
+        <button class="btn-header-small" id="btn-sim-reset" title="Reset Simulation Buffer">
+          <i class="fa-solid fa-rotate"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="controls-scroll-area">
+
+      <!-- Section 1: Signal Source Selection -->
+      <section class="section-box">
+        <div class="section-title">
+          <span><i class="fa-solid fa-heart-pulse"></i> Bio-Signal Source</span>
+          <span class="section-badge">Reference</span>
+        </div>
+        <div class="control-group">
+          <div class="button-pill-group" id="signal-type-pills">
+            <button class="btn-pill active" data-signal="ecg">ECG</button>
+            <button class="btn-pill" data-signal="eeg">EEG (α)</button>
+            <button class="btn-pill" data-signal="sine">Sine 10Hz</button>
+          </div>
+        </div>
+
+        <div class="control-group" id="group-heart-rate">
+          <div class="control-label-row">
+            <span>Heart Rate (BPM)</span>
+            <span class="val" id="val-hr">72</span>
+          </div>
+          <input type="range" id="slider-hr" min="45" max="140" value="72" step="1">
+        </div>
+      </section>
+
+      <!-- Section 2: 50 Hz Power Line Interference -->
+      <section class="section-box">
+        <div class="section-title">
+          <span><i class="fa-solid fa-bolt"></i> 50Hz Power Line Interference</span>
+        </div>
+
+        <div class="control-group">
+          <div class="control-label-row">
+            <span>Noise Amplitude (PLI)</span>
+            <span class="val" id="val-pli-amp">1.20 mV</span>
+          </div>
+          <input type="range" id="slider-pli-amp" min="0.0" max="3.0" value="1.2" step="0.05">
+        </div>
+
+        <div class="control-group">
+          <div class="control-label-row">
+            <span>Grid Mains Frequency</span>
+            <span class="val" id="val-mains-freq">50.0 Hz</span>
+          </div>
+          <input type="range" id="slider-mains-freq" min="45.0" max="55.0" value="50.0" step="0.1">
+        </div>
+
+        <div class="switch-row">
+          <div class="switch-label">
+            <span>3rd Harmonic (150Hz)</span>
+            <span class="switch-subtext">Transformer non-linear distortion</span>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="check-harmonic" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="switch-row">
+          <div class="switch-label">
+            <span>EM Radiation Waves (3D)</span>
+            <span class="switch-subtext">Stray capacitive coupling rays</span>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="check-em-field" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </section>
+
+      <!-- Section 3: Galvanic Isolation Barrier Stage -->
+      <section class="section-box active-isolation">
+        <div class="section-title">
+          <span><i class="fa-solid fa-shield-halved"></i> Galvanic Isolation Barrier</span>
+        </div>
+
+        <div class="switch-row">
+          <div class="switch-label">
+            <span>Optocoupler Isolation</span>
+            <span class="switch-subtext">Breaks Patient Ground Loop</span>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="check-isolation" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="control-group" id="group-ground-loop" style="display: none;">
+          <div class="control-label-row">
+            <span>Ground Loop Common-Mode</span>
+            <span class="val" id="val-cm-noise">1.80 V</span>
+          </div>
+          <input type="range" id="slider-cm-noise" min="0.5" max="5.0" value="1.8" step="0.1">
+        </div>
+      </section>
+
+      <!-- Section 4: Real-Time Digital Notch Filter Design -->
+      <section class="section-box active-filter">
+        <div class="section-title">
+          <span><i class="fa-solid fa-filter"></i> Digital 2nd-Order Notch Filter</span>
+        </div>
+
+        <div class="switch-row">
+          <div class="switch-label">
+            <span>Filter Active State</span>
+            <span class="switch-subtext">Engage real-time IIR filtering</span>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" class="green-toggle" id="check-filter" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="control-group">
+          <div class="control-label-row">
+            <span>Filter Topology</span>
+          </div>
+          <div class="button-pill-group" id="filter-type-pills">
+            <button class="btn-pill active" data-filter="iir">IIR Biquad</button>
+            <button class="btn-pill" data-filter="twint">Twin-T Analog</button>
+            <button class="btn-pill" data-filter="lms">Adaptive LMS</button>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <div class="control-label-row">
+            <span>Center Frequency (f₀)</span>
+            <span class="val" id="val-notch-freq">50.0 Hz</span>
+          </div>
+          <input type="range" id="slider-notch-freq" min="45.0" max="55.0" value="50.0" step="0.1">
+        </div>
+
+        <div class="control-group">
+          <div class="control-label-row">
+            <span>Quality Factor (Q)</span>
+            <span class="val" id="val-q-factor">16.0</span>
+          </div>
+          <input type="range" id="slider-q-factor" min="1.0" max="35.0" value="16.0" step="1.0">
+        </div>
+
+        <!-- Filter Frequency Response Graph -->
+        <div class="filter-response-container">
+          <div class="control-label-row">
+            <span>|H(f)| Frequency Response</span>
+            <span class="val" id="val-filter-bw">BW: 3.1 Hz</span>
+          </div>
+          <canvas id="canvas-filter-response" width="310" height="90"></canvas>
+        </div>
+      </section>
+
+      <!-- Section 5: Digital Storage Oscilloscope Settings -->
+      <section class="section-box">
+        <div class="section-title">
+          <span><i class="fa-solid fa-sliders"></i> Oscilloscope Channels</span>
+        </div>
+
+        <!-- Channel Visibility Toggles -->
+        <div class="ch-visibility-row">
+          <label class="ch-checkbox ch1">
+            <input type="checkbox" id="check-ch1" checked>
+            <span class="ch-indicator"></span>
+            <span>CH1: Clean Ref</span>
+          </label>
+          <label class="ch-checkbox ch2">
+            <input type="checkbox" id="check-ch2" checked>
+            <span class="ch-indicator"></span>
+            <span>CH2: Noisy Input</span>
+          </label>
+          <label class="ch-checkbox ch3">
+            <input type="checkbox" id="check-ch3" checked>
+            <span class="ch-indicator"></span>
+            <span>CH3: Filtered</span>
+          </label>
+        </div>
+
+        <div class="control-group">
+          <div class="control-label-row">
+            <span>Horizontal Timebase</span>
+            <span class="val" id="val-timebase">100 ms/div</span>
+          </div>
+          <input type="range" id="slider-timebase" min="20" max="250" value="100" step="10">
+        </div>
+
+        <div class="control-group">
+          <div class="control-label-row">
+            <span>Voltage Scale</span>
+            <span class="val" id="val-scale-ch">0.5 mV/div</span>
+          </div>
+          <input type="range" id="slider-scale-ch" min="0.2" max="2.0" value="0.5" step="0.1">
+        </div>
+      </section>
+
+      <!-- Section 6: Data Export -->
+      <section class="section-box">
+        <div class="section-title">
+          <span><i class="fa-solid fa-file-export"></i> Lab Data & PDF Export</span>
+        </div>
+        <div class="export-btn-grid">
+          <button class="btn-header" id="btn-export-csv" title="Download numerical time-series CSV">
+            <i class="fa-solid fa-file-csv"></i> Save CSV
+          </button>
+          <button class="btn-header" id="btn-export-png" title="Download 3D canvas snapshot">
+            <i class="fa-solid fa-camera"></i> Snapshot
+          </button>
+          <button class="btn-header primary full-span" id="btn-dock-print-report" title="Print-Friendly Experiment PDF Report">
+            <i class="fa-solid fa-print"></i> Print / PDF Report
+          </button>
+        </div>
+      </section>
+
+    </div>
+  </aside>
+
+  <!-- Bottom Bar: VR Mode & Controls Hint -->
+  <div class="bottom-dock">
+    <div id="vr-container">
+      <!-- VRButton will be inserted here -->
+    </div>
+    <div class="hud-instructions-pill">
+      <span><kbd>Left Drag</kbd> Rotate 3D</span>
+      <span><kbd>Scroll</kbd> Zoom</span>
+      <span><kbd>Right Drag</kbd> Pan</span>
+    </div>
+  </div>
+
+  <!-- Theory & Circuit Schematic Modal -->
+  <div class="modal-overlay" id="modal-theory">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2><i class="fa-solid fa-microchip"></i> Theory & Circuit Architecture</h2>
+        <button class="btn-close-modal" id="btn-close-theory"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <h3>1. The 50 Hz Power Line Interference Problem</h3>
+        <p>
+          In biomedical instrumentation (ECG, EEG, EMG), patient signal voltages are microscopic (typically <strong>0.5 mV to 2.0 mV</strong> for ECG, and <strong>10 µV to 100 µV</strong> for EEG).
+          The human body acts as an antenna capacitively coupled to the 230V/50Hz mains power grid wiring, inducing severe 50 Hz displacement currents into the recording leads and chassis ground loops.
+        </p>
+
+        <h3>2. Galvanic Isolation Barrier (Optocoupler / Isolation Amp)</h3>
+        <p>
+          Galvanic isolation physically breaks the direct galvanic pathway between the patient-connected front-end and the mains earth ground.
+          Using optical isolation (optocouplers / linear optical barriers) or capacitive isolation:
+        </p>
+        <div class="formula-box">
+          Common Mode Rejection Ratio: CMRR (dB) = 20 log₁₀(A_d / A_cm) > 120 dB
+        </div>
+        <p>
+          This isolates the floating ground, completely eliminating ground loop circulating hum and ensuring critical patient electrical safety compliant with <strong>IEC 60601-1</strong>.
+        </p>
+
+        <h3>3. Active Twin-T & Digital IIR Biquad Notch Filter</h3>
+        <p>
+          The remaining differential 50 Hz interference is eliminated by a high-Q notch filter centered at \(f_0 = 50\text{ Hz}\).
+          In discrete-time digital signal processing, a 2nd-order IIR Biquad Notch Filter has the transfer function:
+        </p>
+        <div class="formula-box">
+          H(z) = b₀ · (1 - 2cos(ω₀)z⁻¹ + z⁻²) / (1 - 2r·cos(ω₀)z⁻¹ + r²z⁻²)
+        </div>
+        <p>
+          Where \(\omega_0 = 2\pi f_0 / f_s\) is the normalized center frequency, and \(r = 1 - (\pi \Delta f / f_s)\) controls the pole radius and filter quality factor \(Q = f_0 / \Delta f\).
+          A sharp notch (\(Q \approx 16\)) eliminates 50 Hz hum while leaving adjacent ECG diagnostic features (P, QRS, T waves) undamaged!
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8-Step Guided Experiment Mode Modal -->
+  <div class="modal-overlay" id="modal-guide">
+    <div class="modal-card guide-modal-card">
+      <div class="modal-head">
+        <h2><i class="fa-solid fa-list-check"></i> Guided Experiment Steps</h2>
+        <div class="guide-step-indicator">
+          <span id="guide-step-counter">Step 1 of 8</span>
+        </div>
+        <button class="btn-close-modal" id="btn-close-guide"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <!-- Step Progress Bar -->
+      <div class="guide-progress-bar-container">
+        <div class="guide-progress-bar" id="guide-progress-bar" style="width: 12.5%;"></div>
+      </div>
+
+      <div class="modal-body" id="guide-steps-container">
+
+        <!-- Step 1 -->
+        <div class="guide-step-page active" data-step="1">
+          <div class="step-badge-title">
+            <span class="step-num">1</span>
+            <h3>Configure the Bio-Signal Source</h3>
+          </div>
+          <p>
+            Choose your physiological bio-signal source (ECG or EEG) and set the nominal heart rate (e.g. 72 BPM). At this baseline state, observe the clean cardiac rhythm and record its nominal parameters.
+          </p>
+          <div class="step-action-row">
+            <button class="btn-apply-step" data-step="1">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Configure Step 1
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="guide-step-page" data-step="2">
+          <div class="step-badge-title">
+            <span class="step-num">2</span>
+            <h3>Generate & Observe Clean Signal</h3>
+          </div>
+          <p>
+            With the power-line interference turned off (0.0 mV), examine Channel 1 on the Oscilloscope. Notice the high baseline Signal-to-Noise Ratio (SNR > 35 dB) and zero harmonic distortion.
+          </p>
+          <div class="step-action-row">
+            <button class="btn-apply-step" data-step="2">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Configure Step 2
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="guide-step-page" data-step="3">
+          <div class="step-badge-title">
+            <span class="step-num">3</span>
+            <h3>Introduce 50 Hz Power-Line Interference</h3>
+          </div>
+          <p>
+            Inject 1.2 mV of 50 Hz mains hum and simulate non-isolated ground loop leakage. Observe how the delicate P and T waves of the ECG become completely masked by the sinusoidal interference, driving SNR negative.
+          </p>
+          <div class="step-action-row">
+            <button class="btn-apply-step" data-step="3">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Configure Step 3
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="guide-step-page" data-step="4">
+          <div class="step-badge-title">
+            <span class="step-num">4</span>
+            <h3>Inspect the FFT Spectrum</h3>
+          </div>
+          <p>
+            Switch camera to the Spectrum Analyzer. In the frequency domain, identify the massive spectral spike towering at exactly 50 Hz (and 150 Hz harmonic). Confirm that mains noise power dominates the spectrum.
+          </p>
+          <div class="step-action-row">
+            <button class="btn-apply-step" data-step="4">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Configure Step 4
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 5 -->
+        <div class="guide-step-page" data-step="5">
+          <div class="step-badge-title">
+            <span class="step-num">5</span>
+            <h3>Enable & Configure the Notch Filter</h3>
+          </div>
+          <p>
+            Enable the 2nd-order digital IIR Notch Filter. Align the center frequency \(f_0\) to 50.0 Hz and set the Quality Factor \(Q = 16\). Watch the 50 Hz spectral spike plummet by over 45 dB!
+          </p>
+          <div class="step-action-row">
+            <button class="btn-apply-step" data-step="5">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Configure Step 5
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 6 -->
+        <div class="guide-step-page" data-step="6">
+          <div class="step-badge-title">
+            <span class="step-num">6</span>
+            <h3>Compare Input and Filtered Signals</h3>
+          </div>
+          <p>
+            Simultaneously compare the three channels on the DSO:
+            <br>• <strong>CH1 (Cyan)</strong>: Clean physiological reference.
+            <br>• <strong>CH2 (Yellow)</strong>: Contaminated noisy input.
+            <br>• <strong>CH3 (Green)</strong>: Real-time filtered output with recovered QRS morphology.
+          </p>
+          <div class="step-action-row">
+            <button class="btn-apply-step" data-step="6">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Configure Step 6
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 7 -->
+        <div class="guide-step-page" data-step="7">
+          <div class="step-badge-title">
+            <span class="step-num">7</span>
+            <h3>Evaluate Calculated Performance</h3>
+          </div>
+          <p>
+            Review the live mathematical analytics:
+            <br>• Input Noise RMS vs Output Error RMS.
+            <br>• SNR improvement (\(\Delta\text{SNR} > 30\text{ dB}\)).
+            <br>• Estimated noise reduction percentage (> 90%).
+            <br>• Verification of IEC 60601-1 galvanic barrier integrity.
+          </p>
+          <div class="step-action-row">
+            <button class="btn-apply-step" data-step="7">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Configure Step 7
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 8 -->
+        <div class="guide-step-page" data-step="8">
+          <div class="step-badge-title">
+            <span class="step-num">8</span>
+            <h3>Record Observations & Final Summary</h3>
+          </div>
+          <p>
+            Congratulations! You have successfully completed all stages of the 50 Hz Power Line Interference Isolation & Filter laboratory.
+          </p>
+          <div class="summary-results-card">
+            <h4>Live Experiment Results Summary</h4>
+            <table class="report-table" id="guide-summary-table">
+              <tr><td>Bio-Signal:</td><td id="sum-sig">ECG (72 BPM)</td></tr>
+              <tr><td>Mains Frequency:</td><td id="sum-mains">50.0 Hz</td></tr>
+              <tr><td>Notch Frequency (f₀):</td><td id="sum-notch">50.0 Hz</td></tr>
+              <tr><td>Quality Factor (Q):</td><td id="sum-q">16.0</td></tr>
+              <tr><td>Input SNR:</td><td id="sum-snr-in">-4.2 dB</td></tr>
+              <tr><td>Output SNR:</td><td id="sum-snr-out">+27.8 dB</td></tr>
+              <tr><td>Noise Reduction:</td><td id="sum-reduction">95.0%</td></tr>
+              <tr><td>50Hz Attenuation:</td><td id="sum-atten">-46.8 dB</td></tr>
+            </table>
+          </div>
+          <div class="control-group" style="margin-top: 14px;">
+            <label style="font-size: 12px; color: var(--cyan);">Student Observations & Notes:</label>
+            <textarea id="student-observations" class="student-notes-area" rows="3" placeholder="Enter your scientific conclusions regarding notch filter Q-factor, 50Hz attenuation, and patient safety..."></textarea>
+          </div>
+          <div class="step-action-row">
+            <button class="btn-header primary" id="btn-guide-print-report">
+              <i class="fa-solid fa-file-pdf"></i> Generate Full Lab Report (PDF)
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Step Navigation Footer -->
+      <div class="modal-foot">
+        <button class="btn-header" id="btn-guide-prev" disabled>
+          <i class="fa-solid fa-chevron-left"></i> Previous Step
+        </button>
+        <button class="btn-header primary" id="btn-guide-next">
+          Next Step <i class="fa-solid fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Expanded 2D High-Resolution Instruments Modal (Oscilloscope & FFT Spectrum) -->
+  <div class="modal-overlay" id="modal-instruments">
+    <div class="modal-card instrument-modal-card">
+      <div class="modal-head">
+        <h2><i class="fa-solid fa-chart-line"></i> High-Resolution Dual-Instrument Workbench</h2>
+        <div class="inst-view-controls">
+          <button class="btn-header-small active" id="btn-dso-ch1-toggle">CH1 Ref</button>
+          <button class="btn-header-small active" id="btn-dso-ch2-toggle">CH2 Noise</button>
+          <button class="btn-header-small active" id="btn-dso-ch3-toggle">CH3 Filtered</button>
+        </div>
+        <button class="btn-close-modal" id="btn-close-instruments"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="modal-body instruments-split-view">
+        <!-- 2D DSO Screen Container -->
+        <div class="inst-panel">
+          <div class="inst-panel-header">
+            <span><i class="fa-solid fa-tv"></i> 3-Channel Digital Storage Oscilloscope (DSO)</span>
+            <span class="inst-badge" id="inst-dso-tb">TB: 100 ms/div</span>
+          </div>
+          <div class="canvas-aspect-wrapper">
+            <canvas id="canvas-expanded-dso" width="800" height="420"></canvas>
+          </div>
+          <div class="inst-legend-bar">
+            <span class="legend-dot ch1"></span> CH1 (Clean Ref, Cyan)
+            <span class="legend-dot ch2"></span> CH2 (Noisy Input, Yellow)
+            <span class="legend-dot ch3"></span> CH3 (Filtered, Green)
+          </div>
+        </div>
+
+        <!-- 2D FFT Spectrum Analyzer Screen Container -->
+        <div class="inst-panel">
+          <div class="inst-panel-header">
+            <span><i class="fa-solid fa-chart-column"></i> Real-Time FFT Spectrum Analyzer (0 - 150 Hz)</span>
+            <span class="inst-badge" id="inst-fft-peak">Peak: 50.0 Hz</span>
+          </div>
+          <div class="canvas-aspect-wrapper">
+            <canvas id="canvas-expanded-fft" width="800" height="420"></canvas>
+          </div>
+          <div class="inst-legend-bar">
+            <span class="legend-dot ch2"></span> Raw Spectrum
+            <span class="legend-dot ch3"></span> Filtered Spectrum
+            <span class="legend-dot ch1"></span> Notch Marker
+          </div>
+        </div>
+      </div>
+    </div> 
+  </div>
+
+  <!-- Hidden Print-Friendly Experiment Report Container (Visible in @media print) -->
+  <div id="print-report-container" class="print-only">
+    <div class="report-header">
+      <h1>LABORATORY EXPERIMENT REPORT</h1>
+      <h2>Real-Time Isolation Filter Design for 50Hz Power Line Interference</h2>
+      <p class="report-sub">Biomedical Instrumentation & Signal Processing Virtual Laboratory | IEC 60601-1 Standard</p>
+      <p class="report-date" id="print-date">Date: October 2026</p>
+    </div>
+
+    <div class="print-disclaimer-box">
+      <strong>NOTICE:</strong> All data, signals, and waveforms in this report were generated using mathematical biomedical simulation models (Lead-II Cardiac Gaussians / EEG AR rhythms / 50 Hz stray capacitive coupling).
+    </div>
+
+    <h3>1. Experimental Setup & Simulation Parameters</h3>
+    <table class="print-table" id="print-params-table">
+      <thead>
+        <tr><th>Parameter</th><th>Value</th><th>Unit</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Bio-Signal Type</td><td id="p-sig-type">ECG</td><td>-</td><td>Physiological signal source</td></tr>
+        <tr><td>Heart Rate</td><td id="p-hr">72</td><td>BPM</td><td>Cardiac rhythm frequency</td></tr>
+        <tr><td>Interference Amplitude</td><td id="p-noise-amp">1.20</td><td>mV</td><td>50 Hz mains hum amplitude</td></tr>
+        <tr><td>Grid Mains Frequency</td><td id="p-mains-freq">50.0</td><td>Hz</td><td>AC power distribution frequency</td></tr>
+        <tr><td>3rd Harmonic (150 Hz)</td><td id="p-harmonic">Enabled</td><td>-</td><td>Non-linear load distortion</td></tr>
+        <tr><td>Galvanic Isolation</td><td id="p-iso">Active</td><td>-</td><td>Optocoupler ground loop barrier</td></tr>
+        <tr><td>Notch Filter State</td><td id="p-flt-state">Active</td><td>-</td><td>Digital 2nd-order IIR biquad</td></tr>
+        <tr><td>Notch Center Freq (f₀)</td><td id="p-notch-freq">50.0</td><td>Hz</td><td>Target attenuation frequency</td></tr>
+        <tr><td>Quality Factor (Q)</td><td id="p-q">16.0</td><td>-</td><td>Q = f₀ / Bandwidth</td></tr>
+        <tr><td>Sampling Frequency (fs)</td><td>1000</td><td>Hz</td><td>Biomedical ADC rate</td></tr>
+      </tbody>
+    </table>
+
+    <h3>2. Quantitative Performance Analysis</h3>
+    <table class="print-table" id="print-metrics-table">
+      <thead>
+        <tr><th>Metric</th><th>Measured Value</th><th>Engineering Significance</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Input Noise RMS</td><td id="m-noise-rms">848.5 µV</td><td>RMS level of 50 Hz interference + ground loop hum</td></tr>
+        <tr><td>Output Error RMS</td><td id="m-error-rms">42.1 µV</td><td>Residual deviation from pure reference signal</td></tr>
+        <tr><td>Input SNR</td><td id="m-snr-in">-4.2 dB</td><td>Signal completely obscured by power-line hum</td></tr>
+        <tr><td>Output SNR</td><td id="m-snr-out">+27.8 dB</td><td>Clear diagnostic recovery of P, QRS, and T complexes</td></tr>
+        <tr><td>Noise Reduction</td><td id="m-reduction">95.0%</td><td>Percentage of interference energy eliminated</td></tr>
+        <tr><td>50 Hz Notch Attenuation</td><td id="m-atten">-46.8 dB</td><td>Deep selective notch suppression at mains line</td></tr>
+        <tr><td>Galvanic CMRR</td><td>> 120 dB</td><td>Compliant with IEC 60601-1 medical electrical safety</td></tr>
+      </tbody>
+    </table>
+
+    <h3>3. Recorded Waveforms & Spectrum</h3>
+    <div class="print-waveform-snapshot">
+      <img id="print-snapshot-img" alt="Oscilloscope & Spectrum Analyzer Snapshot">
+    </div>
+
+    <h3>4. Observations & Conclusions</h3>
+    <div class="print-observations-box" id="print-student-notes">
+      The student has verified that capacitive coupling from 50 Hz power distribution lines induces substantial displacement currents that corrupt sensitive biomedical biopotentials. Engaging the galvanic isolation barrier effectively eliminates circulating ground loops. Tuning the second-order digital IIR notch filter to f₀ = 50.0 Hz with a Q-factor of 16 produces a sharp notch that eliminates the interference while preserving the sharp QRS diagnostic complexes.
+    </div>
+  </div>
+
+  <!-- External Libraries: Three.js r128, OrbitControls, VRButton -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/webxr/VRButton.js"></script>
+
+  <!-- Simulation JavaScript -->
+  <script src="./js/main.js"></script>
 </body>
 </html>

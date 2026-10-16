@@ -2,38 +2,38 @@
   "version": 2.0,
   "questions": [
     {
-      "question": "This is a Sample Question 1?",
+      "question": "What is the primary source of 50 Hz power line interference (PLI) in ECG signal acquisition?",
       "answers": {
-        "a": "answer1",
-        "b": "answer2",
-        "c": "answer3",
-        "d": "answer4"
+        "a": "Electromagnetic and stray capacitive coupling from AC mains power wiring",
+        "b": "Thermal noise within the patient's bloodstream",
+        "c": "Atmospheric cosmic ray radiation",
+        "d": "Acoustic room vibrations"
       },
       "explanations": {
-        "a": "Explanation 1  <a href='www.google.com'>here</a>",
-        "b": "Explanation 2",
-        "c": "Explanation 2",
-        "d": "Explanation 2"
+        "a": "230V/50Hz mains power lines capacitively couple displacement currents into the human body and lead wires.",
+        "b": "Thermal noise is wideband Gaussian noise, not coherent 50Hz hum.",
+        "c": "Cosmic rays do not produce coherent 50 Hz sinusoids.",
+        "d": "Acoustic vibrations cause low frequency microphonic artifacts, not 50 Hz electrical interference."
       },
       "correctAnswer": "a",
       "difficulty": "beginner"
     },
     {
-      "question": "This is a Sample Question 2?",
+      "question": "Why is a galvanic isolation barrier essential in biomedical signal acquisition systems?",
       "answers": {
-        "a": "answer1",
-        "b": "answer2",
-        "c": "answer3",
-        "d": "answer4"
+        "a": "To amplify the ECG signal by a factor of 1000",
+        "b": "To eliminate ground loops and protect the patient from dangerous leakage currents per IEC 60601-1",
+        "c": "To convert analog signals directly into optical laser beams for transmission",
+        "d": "To increase the power consumption of the front-end amplifier"
       },
       "explanations": {
-        "a": "Explanation 1  <a href='www.google.com'>here</a>",
-        "b": "Explanation 2",
-        "c": "Explanation 2",
-        "d": "Explanation 2"
+        "a": "Amplification is performed by instrumentation amplifiers, not isolation barriers.",
+        "b": "Galvanic isolation physically breaks ground connections between patient and mains earth, preventing ground loops and guaranteeing patient electrical safety.",
+        "c": "While optical isolation uses optocouplers, its primary purpose is electrical separation, not laser beam transmission.",
+        "d": "Medical devices are designed to minimize power consumption."
       },
-      "correctAnswer": "c",
-      "difficulty": "beginner"
+      "correctAnswer": "b",
+      "difficulty": "intermediate"
     }
   ]
 }
